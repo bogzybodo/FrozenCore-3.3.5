@@ -91,6 +91,7 @@ void BattlegroundRV::StartingEventOpenDoors()
 
     setState(BG_RV_STATE_OPEN_FENCES);
     setTimer(BG_RV_FIRST_TIMER);
+	
       
     // Add all DynLoS to the map
     m_DynLos[0] = GetBgMap()->AddDynLOSObject(763.632385f, -306.162384f, 25.909504f, BG_RV_PILLAR_SMALL_RADIUS, BG_RV_PILLAR_SMALL_HEIGHT);

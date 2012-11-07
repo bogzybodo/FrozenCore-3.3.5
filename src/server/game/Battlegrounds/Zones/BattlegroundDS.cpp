@@ -92,7 +92,26 @@ void BattlegroundDS::PostUpdateImpl(uint32 diff)
 		else
 			setWaterFallKnockbackTimer(getWaterFallKnockbackTimer() - diff);
 	}
-
+	
+	// constant checking if players are not in starting places
+	if (_KnockbackTimer <= diff)
+	{
+		for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr !=GetPlayers().end(); ++itr)
+		{
+			Player *player = ObjectAccessor::FindPlayer(itr->first);
+			if (!player)
+				continue;
+				
+			if (player->GetDistance2d(1214.0f, 765.0f) <= 50.0f && player->GetPositionZ() >13.0f)
+				player->KnockBackWithAngle(0.0f, 50.0f, 8.0f);
+			else if (player->GetDistance2d(1369.0f, 817.0f) <= 50.0f && player->GetPositionZ() > 13.0f)
+				player->KnockBackWithAngle(M_PI, 50.0f, 8.0f);
+		}
+		_KnockbackTimer = 5*IN_MILLISECONDS;
+	}
+	else _KnockbackTimer -= diff;
+	
+	// Waterfall handling
     if (getWaterFallTimer() < diff)
     {
         if (getWaterFallStatus() == BG_DS_WATERFALL_STATUS_OFF) // Add the water
@@ -116,15 +135,30 @@ void BattlegroundDS::PostUpdateImpl(uint32 diff)
             // turn off collision
             if (GameObject* gob = GetBgMap()->GetGameObject(BgObjects[BG_DS_OBJECT_WATER_1]))
                 gob->SetGoState(GO_STATE_ACTIVE);
+			
+			// Init start checking of starting places
+			_KnockbackTimer = 10*IN_MILLISECONDS;
 
             DoorOpen(BG_DS_OBJECT_WATER_2);
-            setWaterFallTimer(urand(BG_DS_WATERFALL_TIMER_MIN, BG_DS_WATERFALL_TIMER_MAX));
+            setWaterFallTimer(BG_DS_WATERFALL_TIMER);
             setWaterFallStatus(BG_DS_WATERFALL_STATUS_OFF);
         }
     }
     else
         setWaterFallTimer(getWaterFallTimer() - diff);
     
+	// handling of knockback when waterfall is active
+	if (getWaterFallStatus() == BG_DS_WATERFALL_STATUS_ON)
+	{
+		for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end();itr++)
+		{
+			Player *player = ObjectAccessor::FindPlayer(itr->first);
+			if (!player) continue;
+			
+			if (player->GetDistance2d(1291.56f, 790.837f) < 3.8f)
+				player->KnockbackFrom(1291.56f, 790.837f, 30.0f, 4.5f);
+		}
+	}
     if (GetStatus() == STATUS_IN_PROGRESS)
     {
         if(knockback < diff && knockbackCheck)
@@ -161,7 +195,7 @@ void BattlegroundDS::StartingEventOpenDoors()
     for (uint32 i = BG_DS_OBJECT_BUFF_1; i <= BG_DS_OBJECT_BUFF_2; ++i)
         SpawnBGObject(i, 60);
 
-    setWaterFallTimer(urand(BG_DS_WATERFALL_TIMER_MIN, BG_DS_WATERFALL_TIMER_MAX));
+    setWaterFallTimer(BG_DS_WATERFALL_TIMER);
     setWaterFallStatus(BG_DS_WATERFALL_STATUS_OFF);
 
     setPipeKnockBackTimer(BG_DS_PIPE_KNOCKBACK_FIRST_DELAY);
@@ -278,6 +312,7 @@ bool BattlegroundDS::SetupBattleground()
         sLog->outError(LOG_FILTER_SQL, "BatteGroundDS: Failed to spawn some object!");
         return false;
     }
+	_KnockbackTimer = 250*IN_MILLISECONDS;
 
     return true;
 }

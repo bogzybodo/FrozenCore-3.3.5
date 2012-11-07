@@ -66,7 +66,8 @@ enum BattlegroundDSData
 { // Values Fixed by Terabyte
     BG_DS_WATERFALL_TIMER_MIN                    = 35000,
     BG_DS_WATERFALL_TIMER_MAX                    = 60000,
-    BG_DS_WATERFALL_WARNING_DURATION             = 7000,
+	BG_DS_WATERFALL_TIMER						 = 30000,
+    BG_DS_WATERFALL_WARNING_DURATION             = 5000,
     BG_DS_WATERFALL_DURATION                     = 30000,
     BG_DS_WATERFALL_KNOCKBACK_TIMER              = 500,
 
@@ -100,6 +101,7 @@ class BattlegroundDS : public Battleground
     private:
         uint32 _waterfallTimer;
         uint8 _waterfallStatus;
+		uint32 _KnockbackTimer;
         uint32 _waterfallKnockbackTimer;
         uint32 _pipeKnockBackTimer;
         uint8 _pipeKnockBackCount;
